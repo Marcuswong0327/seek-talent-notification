@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 const DEFAULT_FROM = "Marcus Wong <marcus.wong@linktal.com.au>";
 const DEFAULT_RECIPIENTS = "marcus.wong@linktal.com.au";
@@ -11,20 +11,35 @@ function csvEscape(value) {
   return s;
 }
 
-// Build into csv format and trigger download
-function downloadJobsCsv(jobs, filename = "seek-jobs.csv") {
+function downloadCandidatesCsv(candidates, filename = "seek-candidates.csv") {
 
   // Guard clause
-  if (!Array.isArray(jobs) || jobs.length === 0) return;
+  if (!Array.isArray(candidates) || candidates.length === 0) return;
   
-  const headers = ["Job Title", "Company", "Location", "Salary", "Seek URL"];
-  const rows = jobs.map((j) =>
+  // Add UTF-8 BOM so Excel opens UTF-8 reliably.
+  const bom = "\uFEFF";
+  const headers = [
+    "Name",
+    "Career 1",
+    "Duration 1",
+    "Career 2",
+    "Duration 2",
+    "Location",
+    "Salary",
+    "Updated status",
+    "Profile URL",
+  ];
+  const rows = candidates.map((c) =>
     [
-      csvEscape(j.jobTitle),
-      csvEscape(j.company),
-      csvEscape(j.location),
-      csvEscape(j.salary),
-      csvEscape(j.jobUrl),
+      csvEscape(c.candidateName),
+      csvEscape(c.career1),
+      csvEscape(c.duration1),
+      csvEscape(c.career2),
+      csvEscape(c.duration2),
+      csvEscape(c.location),
+      csvEscape(c.salary),
+      csvEscape(c.updatedStatus),
+      csvEscape(c.profileUrl),
     ].join(","),
   );
 
@@ -33,7 +48,7 @@ function downloadJobsCsv(jobs, filename = "seek-jobs.csv") {
   // create invisible HTML link <a> and attach fake web address 
   // tell browsers to click and download 
   // URL.revokeObjectURL - delete fake web address from memory, so free resources 
-  const csv = [headers.join(","), ...rows].join("\r\n");
+  const csv = bom + [headers.join(","), ...rows].join("\r\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); // utf is the modern one - accept special symbol 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -44,9 +59,10 @@ function downloadJobsCsv(jobs, filename = "seek-jobs.csv") {
 }
 
 export default function App() {
-  const [searchString, setSearchString] = useState(""); //job title 
-  const [lastUpdated, setLastUpdated] = useState(""); //filter last updated profile status 
+  const [searchString, setSearchString] = useState(""); // Boolean search string
+  const [nation, setNation] = useState("AU");
   const [location, setLocation] = useState("");
+  const [pageNumber, setPageNumber] = useState(1);
   const [emailFrom, setEmailFrom] = useState(() => {
     try {
       return DEFAULT_FROM;
@@ -81,7 +97,10 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           searchString,
+          nation,
           location,
+          pageNumber: Number(pageNumber) || 1,
+          sortBy: "dateUpdated",
           emailFrom: emailFrom.trim(),
           emailTo: emailRecipients,
         }),
@@ -95,9 +114,9 @@ export default function App() {
         setResult(json);
 
       // DOWNLOAD FILE
-      if (Array.isArray(json.jobs) && json.jobs.length > 0) {
-        const name = `seek-jobs-${searchString}-${location}.csv`;
-        downloadJobsCsv(json.jobs, name);
+      if (Array.isArray(json.candidates) && json.candidates.length > 0) {
+        const name = `seek-candidates-${searchString}-${location || "all"}.csv`;
+        downloadCandidatesCsv(json.candidates, name);
       }
     } catch (e) {
       setError(e.message || String(e));
@@ -108,21 +127,44 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 720, margin: "40px auto", padding: 16 }}>
-      <h2>Seek Job Extraction</h2>
+      <h2>Seek Talent Candidate Extraction</h2>
       <div style={{ display: "grid", gap: 12 }}>
         <label>
-          Search string
+          Boolean search job title
           <input
             value={searchString}
             onChange={(e) => setSearchString(e.target.value)}
+            placeholder='"estimator" OR "cost planner"'
             style={{ width: "100%", padding: 8, marginTop: 6 }}
           />
         </label>
         <label>
-          Location
+          Market
+          <select
+            value={nation}
+            onChange={(e) => setNation(e.target.value)}
+            style={{ width: "100%", padding: 8, marginTop: 6 }}
+          >
+            <option value="AU">AU</option>
+            <option value="MY">MY</option>
+          </select>
+        </label>
+        <label>
+          Suburb / city / region
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            placeholder="New South Wales, Melbourne, Queensland..."
+            style={{ width: "100%", padding: 8, marginTop: 6 }}
+          />
+        </label>
+        <label>
+          Page number
+          <input
+            type="number"
+            min={1}
+            value={pageNumber}
+            onChange={(e) => setPageNumber(e.target.value)}
             style={{ width: "100%", padding: 8, marginTop: 6 }}
           />
         </label>
@@ -154,8 +196,8 @@ export default function App() {
           </label>
         </fieldset>
 
-        <button onClick={onExtract} disabled={loading || !searchString || !location}>
-          {loading ? "Extracting..." : "Extract jobs"}
+        <button onClick={onExtract} disabled={loading || !searchString}>
+          {loading ? "Extracting..." : "Extract candidates (Date updated)"}
         </button>
       </div>
 
