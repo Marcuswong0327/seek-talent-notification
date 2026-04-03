@@ -1,32 +1,36 @@
-{
-  "name": "seek-talent-notification",
-  "version": "1.0.0",
-  "description": "Scrape candidates' name &amp; career info into 10 columns header",
-  "private": true,
-  "main": "index.js",
-  "scripts": {
-    "dev": "concurrently -n SERVER,CLIENT -c green,blue \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
-    "dev:server": "npm --prefix server run dev",
-    "dev:client": "npm --prefix client run dev",
-    "start": "npm --prefix server run start"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Marcuswong0327/seek-talent-notification.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Marcuswong0327/seek-talent-notification/issues"
-  },
-  "homepage": "https://github.com/Marcuswong0327/seek-talent-notification#readme",
-  "dependencies": {
-    "crawlee": "^3.16.0",
-    "playwright": "^1.58.2"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
-  }
+﻿{
+    "name":  "seek-talent-notification",
+    "version":  "1.0.0",
+    "description":  "Scrape candidates\u0027 name \u0026amp; career info into 10 columns header",
+    "private":  true,
+    "main":  "index.js",
+    "scripts":  {
+                    "dev":  "npm --prefix server run dev",
+                    "dev:server":  "npm --prefix server run dev",
+                    "dev:client":  "npm --prefix client run dev",
+                    "start":  "npm --prefix server run start",
+                    "client":  "npm --prefix client run dev",
+                    "dev:all":  "concurrently -n SERVER,CLIENT -c green,blue \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+                },
+    "repository":  {
+                       "type":  "git",
+                       "url":  "git+https://github.com/Marcuswong0327/seek-talent-notification.git"
+                   },
+    "keywords":  [
+
+                 ],
+    "author":  "",
+    "license":  "ISC",
+    "type":  "commonjs",
+    "bugs":  {
+                 "url":  "https://github.com/Marcuswong0327/seek-talent-notification/issues"
+             },
+    "homepage":  "https://github.com/Marcuswong0327/seek-talent-notification#readme",
+    "dependencies":  {
+                         "crawlee":  "^3.16.0",
+                         "playwright":  "^1.58.2"
+                     },
+    "devDependencies":  {
+                            "concurrently":  "^9.2.1"
+                        }
 }
