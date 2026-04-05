@@ -1,18 +1,14 @@
 "use strict";
 
-const { createClient } = require("@supabase/supabase-js");
+/**
+ * Thin re-export: keeps the original `require("./supabaseClient")` path working.
+ * Implementation: `SupabaseClientProvider` (factory / encapsulation of env + createClient).
+ */
+
+const { SupabaseClientProvider } = require("./supabase/SupabaseClientProvider");
 
 function getSupabase() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseRoleKey) {
-        throw new Error("Missing supabase url or supabase role key");
-    }
-
-    return createClient(supabaseUrl, supabaseRoleKey, {
-        auth: { persistSession: false },
-    });
+    return SupabaseClientProvider.create();
 }
 
 module.exports = { getSupabase };
